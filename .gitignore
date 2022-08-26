@@ -1,4 +1,5 @@
 .DS_Store
+.aws-sam/
 .vscode/settings.json
 .vscode/launch.json
 __init__.py

@@ -16,20 +16,19 @@ Resources:
       Users:
         - Password: '{{resolve:secretsmanager:MQAccess:SecretString:password}}'
           Username: '{{resolve:secretsmanager:MQAccess:SecretString:username}}'
-
+    
   MQProducer:
     Type: AWS::Serverless::Function 
     Properties:
       CodeUri: code/
       Timeout: 3
       Handler: producer.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.9
       Environment:
         Variables:
-          mqhost: !Select [ 0, !GetAtt MQBroker.AmqpEndpoints ]
+          mqhost: !Select [ 0, !Split [ ':', !Select [ 2, !Split [ '/', !Select [ 0, !GetAtt 'MQBroker.AmqpEndpoints' ] ] ] ] ]
           mquser: '{{resolve:secretsmanager:MQAccess:SecretString:username}}'
-          mqpass: '{{resolve:secretsmanager:MQAccess:SecretString:password}}'
-          
+          mqpass: '{{resolve:secretsmanager:MQAccess:SecretString:password}}'         
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -38,6 +37,7 @@ Resources:
               Action:
               - mq:DescribeBroker
               - secretsmanager:GetSecretValue
+    DependsOn: MQBroker
 
   MQConsumer:
     Type: AWS::Serverless::Function 
@@ -45,10 +45,10 @@ Resources:
       CodeUri: code/
       Timeout: 3
       Handler: consumer.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.9
       Environment:
         Variables:
-          mqhost: !Select [ 0, !GetAtt MQBroker.AmqpEndpoints ]
+          mqhost: !Select [ 0, !Split [ ':', !Select [ 2, !Split [ '/', !Select [ 0, !GetAtt 'MQBroker.AmqpEndpoints' ] ] ] ] ]
           mquser: '{{resolve:secretsmanager:MQAccess:SecretString:username}}'
           mqpass: '{{resolve:secretsmanager:MQAccess:SecretString:password}}'
       Policies:
@@ -59,3 +59,4 @@ Resources:
               Action:
               - mq:DescribeBroker
               - secretsmanager:GetSecretValue
+    DependsOn: MQBroker
