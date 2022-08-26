@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Amazon MQ for RabbitMQ Example
+
+Resources:
+  MQBroker:
+    Type: AWS::AmazonMQ::Broker
+    Properties: 
+      AutoMinorVersionUpgrade: false
+      BrokerName: myMQBroker
+      DeploymentMode: SINGLE_INSTANCE
+      EngineType: RABBITMQ
+      EngineVersion: "3.8.11"
+      HostInstanceType: mq.m5.large
+      PubliclyAccessible: true
+      Users:
+        - Password: '{{resolve:secretsmanager:MQAccess:SecretString:password}}'
+          Username: '{{resolve:secretsmanager:MQAccess:SecretString:username}}'
+
+  MQProducer:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: code/
+      Timeout: 3
+      Handler: producer.lambda_handler
+      Runtime: python3.7
+      Environment:
+        Variables:
+          mqhost: !Select [ 0, !GetAtt MQBroker.AmqpEndpoints ]
+          mquser: '{{resolve:secretsmanager:MQAccess:SecretString:username}}'
+          mqpass: '{{resolve:secretsmanager:MQAccess:SecretString:password}}'
+          
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Resource: '*'
+              Action:
+              - mq:DescribeBroker
+              - secretsmanager:GetSecretValue
+
+  MQConsumer:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: code/
+      Timeout: 3
+      Handler: consumer.lambda_handler
+      Runtime: python3.7
+      Environment:
+        Variables:
+          mqhost: !Select [ 0, !GetAtt MQBroker.AmqpEndpoints ]
+          mquser: '{{resolve:secretsmanager:MQAccess:SecretString:username}}'
+          mqpass: '{{resolve:secretsmanager:MQAccess:SecretString:password}}'
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Resource: '*'
+              Action:
+              - mq:DescribeBroker
+              - secretsmanager:GetSecretValue
