@@ -97,3 +97,48 @@ Resources:
         - SQSSendMessagePolicy:
             QueueName: !GetAtt MySqsQueue.QueueName
     DependsOn: MySqsQueue
+
+  MySnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      FifoTopic: True
+      TopicName: mySNSTopic.fifo
+      ContentBasedDeduplication: True
+
+  SpecificCoinQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: True
+      ContentBasedDeduplication: True #Exactly-once processing
+      QueueName: SpecificCoinQueue.fifo
+
+  SpecificStoreSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: sqs
+      Endpoint: !GetAtt SpecificCoinQueue.Arn
+      TopicArn: !Ref MySnsTopic
+      #see https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html
+      RawMessageDelivery: True
+      # Enables the subscriber to filter out unwanted messages
+      #see https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html
+      FilterPolicy: {"coin": ["example_coin"]}
+  
+  MultipleExchangesQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: True
+      ContentBasedDeduplication: True #Exactly-once processing
+      QueueName: MultipleExchangesQueue.fifo
+
+  MultipleExchangesSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: sqs
+      Endpoint: !GetAtt MultipleExchangesQueue.Arn
+      TopicArn: !Ref MySnsTopic
+      #see https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html
+      RawMessageDelivery: True
+      # Enables the subscriber to filter out unwanted messages
+      #see https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html
+      FilterPolicy: {"exchange_id": ["mychosenexchange", "mynextexchange"]}
