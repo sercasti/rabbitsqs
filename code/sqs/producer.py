@@ -10,6 +10,7 @@ def lambda_handler(event, context):
     response = sqs.send_message(
       QueueUrl=queue_url,
       DelaySeconds=0,
+      #see https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/using-messagegroupid-property.html
       MessageGroupId='myMessageGroup',
       MessageAttributes={
         'Title': {
