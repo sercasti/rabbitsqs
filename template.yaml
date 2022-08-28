@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Amazon MQ for RabbitMQ Example
+Description: Comparison of the code to use Amazon MQ for RabbitMQ vs AWS SQS
 
 Resources:
   MQBroker:
@@ -20,7 +20,7 @@ Resources:
   MQProducer:
     Type: AWS::Serverless::Function 
     Properties:
-      CodeUri: code/
+      CodeUri: code/rbmq/
       Timeout: 3
       Handler: producer.lambda_handler
       Runtime: python3.9
@@ -42,8 +42,8 @@ Resources:
   MQConsumer:
     Type: AWS::Serverless::Function 
     Properties:
-      CodeUri: code/
-      Timeout: 3
+      CodeUri: code/rbmq/
+      Timeout: 10
       Handler: consumer.lambda_handler
       Runtime: python3.9
       Environment:
@@ -60,3 +60,40 @@ Resources:
               - mq:DescribeBroker
               - secretsmanager:GetSecretValue
     DependsOn: MQBroker
+  
+  MySqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: True
+      ContentBasedDeduplication: True #Exactly-once processing
+      QueueName: MySqsQueue.fifo
+
+  SQSConsumer:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: code/sqs/
+      Timeout: 3
+      Handler: consumer.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          SQS_QUEUE_URL: !Ref MySqsQueue
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt MySqsQueue.QueueName
+    DependsOn: MySqsQueue
+
+  SQSProducer:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: code/sqs/
+      Timeout: 3
+      Handler: producer.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          SQS_QUEUE_URL: !Ref MySqsQueue
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt MySqsQueue.QueueName
+    DependsOn: MySqsQueue

@@ -2,7 +2,10 @@ import pika   #Python AMQP Library
 
 import os
 import ssl
-import datetime
+import json
+
+# Yes, you can trigger a Lambda from MQ directly, but this code is meant to 
+# represent a process running on a virtual machine for modernization purposes
 
 # get Environment Variables
 RABBIT_HOST = os.environ['mqhost']
@@ -23,5 +26,9 @@ channel = connection.channel()  #Establishes logical channel within Connection
 channel.queue_declare(queue='myQueue')
 
 def lambda_handler(event, context):
-    #Send Message
-    channel.basic_publish(exchange='', routing_key='', body='Howdy RabbitMQ, Lambda Here!! ' + datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y") + ' UTC') 
+    #Get Message
+    channel.basic_consume(queue='myQueue', on_message_callback=msgcallback, auto_ack=True)
+    channel.start_consuming()
+
+def msgcallback(ch, method, properties, body):
+    print(" [x] Received %r" % body)

@@ -2,7 +2,7 @@ import pika   #Python AMQP Library
 
 import os
 import ssl
-import json
+import datetime
 
 # get Environment Variables
 RABBIT_HOST = os.environ['mqhost']
@@ -20,11 +20,8 @@ parameters = pika.ConnectionParameters(credentials=credentials, host=RABBIT_HOST
 # parameters and credentials ready to support calls to RabbitMQ
 connection = pika.BlockingConnection(parameters)  #Establishes TCP Connection with RabbitMQ
 channel = connection.channel()  #Establishes logical channel within Connection
+channel.queue_declare(queue='myQueue')
 
 def lambda_handler(event, context):
-    #Get Message
-    channel.basic_consume('myQueue', on_message_callback=callback, auto_ack=True, exclusive=False, consumer_tag=None, arguments=None, callback=None)
-
-
-def callback(ch, method, properties, body):
-    print(" [x] Received %r" % body)
+    #Send Message
+    channel.basic_publish(exchange='', routing_key='myQueue', body='Howdy RabbitMQ, Lambda Here!! ' + datetime.datetime.now().strftime("%I:%M:%S%p on %B %d, %Y") + ' UTC') 
