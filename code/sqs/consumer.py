@@ -14,7 +14,7 @@ def lambda_handler(event, context):
     # see https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/sqs.html#SQS.Client.receive_message
     response = sqs.receive_message(
       QueueUrl=queue_url,
-      #AWS attributes ()
+      #AWS attributes (MessageGroupId, SequenceNumber, SentTimestamp, MessageDeduplicationId)
       AttributeNames=[
         'SentTimestamp'
       ],

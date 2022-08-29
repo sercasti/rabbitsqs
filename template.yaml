@@ -142,3 +142,21 @@ Resources:
       # Enables the subscriber to filter out unwanted messages
       #see https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html
       FilterPolicy: {"exchange_id": ["mychosenexchange", "mynextexchange"]}
+
+  SQSQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref SpecificCoinQueue
+        - !Ref MultipleExchangesQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+            Effect: Allow
+            Principal:
+              Service: "sns.amazonaws.com"
+            Action: SQS:SendMessage          
+            Resource: '*'
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref MySnsTopic

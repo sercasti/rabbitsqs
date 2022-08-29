@@ -15,3 +15,13 @@ This example will use python Lambda samples, using python 3.8 and RabbitMQ 3.8.x
   - take note of the ARN for this new secret
 - In the last line of the template.yaml file in this project, copy that ARN value.
 - Run sam deploy --guided on your terminal, at the root of this project
+
+## Usage
+
+1. Open your AWS Console and find the Lambda service at: https://console.aws.amazon.com/lambda/home
+1. Execute a test function on the MQProducer Lambda, consume the message with MQConsumer
+1. Execute a test function on the SQSProducer Lambda, consume the message with SQSConsumer
+1. Open your AWS Console and find the SNS service at: https://console.aws.amazon.com/sns/
+1. Publish a message to the topic with a sample json body and the message attrib "coin" as "example_coin"
+1. Publish a message to the topic with a sample json body and the message attrib "exchange_id" as "mynextexchange"
+1. Check the SQS home to see how the routing between queues worked via filtering, as configured on template.yml with FilterPolicy on AWS::SNS::Subscription
