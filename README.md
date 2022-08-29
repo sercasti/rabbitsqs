@@ -11,10 +11,12 @@ This example will use python Lambda samples, using python 3.8 and RabbitMQ 3.8.x
   - Click "Other type of secrets".
   - In the Secret key/value, enter username for the first key and password for the second key. Enter any values you'd like to use. Password min chars: 12
   - For Secret name, enter ‘MQAccess’
-  - Keep all other setting default
-  - take note of the ARN for this new secret
-- In the last line of the template.yaml file in this project, copy that ARN value.
-- Run sam deploy --guided on your terminal, at the root of this project. This will create all the resources on your AWS account via CloudFormation.
+  - Keep all other setting default.
+  - Make sure secret name was saved as ‘MQAccess’
+
+    ![secret](/assets/images/0.secret.png)
+- Make sure your AWS credentials are set on your terminal session for the right AWS account
+- Run sam deploy --guided on your terminal, at the root of this project. Just hit 'Enter' for every prompt. This will create all the resources on your AWS account via CloudFormation.
 
 ## Usage
 
