@@ -14,14 +14,29 @@ This example will use python Lambda samples, using python 3.8 and RabbitMQ 3.8.x
   - Keep all other setting default
   - take note of the ARN for this new secret
 - In the last line of the template.yaml file in this project, copy that ARN value.
-- Run sam deploy --guided on your terminal, at the root of this project
+- Run sam deploy --guided on your terminal, at the root of this project. This will create all the resources on your AWS account via CloudFormation.
 
 ## Usage
 
 1. Open your AWS Console and find the Lambda service at: https://console.aws.amazon.com/lambda/home
+ ![Lambdas](/assets/images/1.lambda%20functions.png)
 1. Execute a test function on the MQProducer Lambda, consume the message with MQConsumer
+ ![ConsumeMQ](/assets/images/2.consume%20mq.png)
 1. Execute a test function on the SQSProducer Lambda, consume the message with SQSConsumer
+ ![producesqs](/assets/images/3.produce%20message.png)
+ ![consumesqs](/assets/images/4.consume%20message.png)
+1. Observe the queues created for exchanges and coins:
+ ![allqueues](/assets/images/5.all%20queues.png)
 1. Open your AWS Console and find the SNS service at: https://console.aws.amazon.com/sns/
+ ![sns](/assets/images/6.topic%20subscriptions.png)
 1. Publish a message to the topic with a sample json body and the message attrib "coin" as "example_coin"
+ ![publishsns](/assets/images/7.publish%20message.png)
 1. Publish a message to the topic with a sample json body and the message attrib "exchange_id" as "mynextexchange"
 1. Check the SQS home to see how the routing between queues worked via filtering, as configured on template.yml with FilterPolicy on AWS::SNS::Subscription
+ ![sns](/assets/images/8.sent%20Messages.png)
+1. You can do any combination of message attributes to do dynamic routing/filtering
+ ![combine](/assets/images/9.combine.png)
+1. poll for messages on each SQS queue to get the message
+ ![poll](/assets/images/10.received%20sqs.png)
+1. check the message details to confirm routing worked as expected
+ ![read](/assets/images/11.view%20message.png)
